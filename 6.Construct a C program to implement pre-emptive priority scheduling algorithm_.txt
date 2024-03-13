@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdbool.h>
+typedef struct 
+{
+    int process_id;
+    int arrival_time;
+    int burst_time;
+    int priority;
+    int remaining_time;
+    bool completed;
+} Process;
+
+// Function to find the process with the highest priority at the current time
+int findHighestPriorityProcess(Process processes[], int n, int current_time) {
+    int highest_priority_index = -1;
+    int highest_priority = -1;
+	int i; // Initialize with a low value
+    
+    // Iterate through all processes to find the one with the highest priority at the current time
+    for (i = 0; i < n; i++) 
+	{
+        if (!processes[i].completed && processes[i].arrival_time <= current_time && processes[i].priority > highest_priority) 
+		{
+            highest_priority_index = i;
+            highest_priority = processes[i].priority;
+        }
+    }
+    
+    return highest_priority_index;
+}
+
+// Function to execute processes using preemptive priority scheduling
+void executePreemptivePriority(Process processes[], int n) {
+    int current_time = 0;
+    int completed_processes = 0;
+    int i;
+    
+    // Loop until all processes are completed
+    while (completed_processes < n) {
+        int highest_priority_index = findHighestPriorityProcess(processes, n, current_time);
+        
+        // If no process is found, move time forward to the next process arrival
+        if (highest_priority_index == -1) 
+		{
+            int next_arrival_time = 999999; // Initialize with a large value
+            
+            // Find the next arrival time
+            for (i = 0; i < n; i++) {
+                if (!processes[i].completed && processes[i].arrival_time > current_time && processes[i].arrival_time < next_arrival_time) {
+                    next_arrival_time = processes[i].arrival_time;
+                }
+            }
+            
+            current_time = next_arrival_time;
+        } else {
+            // Execute the process with the highest priority for 1 unit of time
+            printf("Executing process %d at time %d\n", processes[highest_priority_index].process_id, current_time);
+            processes[highest_priority_index].remaining_time--;
+            current_time++;
+            
+            // Check if the process is completed
+            if (processes[highest_priority_index].remaining_time == 0) {
+                processes[highest_priority_index].completed = true;
+                completed_processes++;
+            }
+        }
+    }
+}
+
+int main() 
+{
+    int n,i;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    Process processes[n];
+    printf("Enter arrival time, burst time, and priority for each process:\n");
+    for (i = 0; i < n; i++) 
+	{
+        processes[i].process_id = i + 1;
+        processes[i].completed = false;
+        printf("Process %d: ", i + 1);
+        scanf("%d %d %d", &processes[i].arrival_time, &processes[i].burst_time, &processes[i].priority);
+        processes[i].remaining_time = processes[i].burst_time;
+    }
+    executePreemptivePriority(processes, n);
+    
+    return 0;
+}

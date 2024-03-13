@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+// Process structure
+typedef struct 
+{
+    int process_id;
+    int arrival_time;
+    int burst_time;
+    int remaining_time; // Remaining burst time
+    bool completed;     // Indicates if the process has completed execution
+} Process;
+
+// Function to find the process with the smallest remaining burst time
+int findSmallestProcess(Process processes[], int n, int current_time) 
+{
+    int smallest_index = -1;
+    int smallest_time = 999999;
+	int i; // Initialize with a large value
+    
+    // Iterate through all processes to find the one with the smallest remaining burst time
+    for (i = 0; i < n; i++) {
+        if (!processes[i].completed && processes[i].arrival_time <= current_time && processes[i].remaining_time < smallest_time) 
+		{
+            smallest_index = i;
+            smallest_time = processes[i].remaining_time;
+        }
+    }
+    
+    return smallest_index;
+}
+
+// Function to execute the processes using shortest remaining time first (SRTF) scheduling
+void executeSRTF(Process processes[], int n) {
+    int current_time = 0;
+    
+    // Loop until all processes are completed
+    while (true) 
+	{
+        int smallest_index = findSmallestProcess(processes, n, current_time);
+        
+        // If no process is found, exit the loop
+        if (smallest_index == -1)
+            break;
+        
+        // Execute the process with the smallest remaining burst time
+        printf("Executing process %d at time %d\n", processes[smallest_index].process_id, current_time);
+        current_time += processes[smallest_index].remaining_time;
+        processes[smallest_index].remaining_time = 0;
+        processes[smallest_index].completed = true;
+    }
+}
+
+int main() 
+{
+    // Number of processes
+    int n,i;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    
+    // Array to store processes
+    Process processes[n];
+    
+    // Input process details
+    printf("Enter arrival time and burst time for each process:\n");
+    for (i = 0; i < n; i++) {
+        processes[i].process_id = i + 1;
+        processes[i].completed = false;
+        printf("Process %d: ", i + 1);
+        scanf("%d %d", &processes[i].arrival_time, &processes[i].burst_time);
+        processes[i].remaining_time = processes[i].burst_time;
+    }
+    
+    // Execute the processes using Shortest Remaining Time First (SRTF) scheduling
+    executeSRTF(processes, n);
+    
+    return 0;
+}
